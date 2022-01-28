@@ -31,7 +31,7 @@ import pandas
 ###
 import fileutils
 import linuxutils
-from   urdecorators import show_exceptions_and_frames as trap
+from   urdecorators import trap
 
 ###
 # Credits
@@ -45,38 +45,13 @@ __email__ = ['gflanagin@richmond.edu', 'me@georgeflanagin.com']
 __status__ = 'in progress'
 __license__ = 'MIT'
 
-@trap
-def build_word_map(filename:str) -> pandas.DataFrame:
-    """
-    Return a DataFrame of five columns, with the letters
-    of each five letter word. 
-    """    
-    words = []
-    for word in fileutils.read_whitespace_file(filename):
-        words.append(tuple(word))
-
-    return pandas.DataFrame(data=words)
-
+theword = ""
 
 @trap
-def column_frequencies(word_data:list) -> tuple:
+def column_frequencies(words:list) -> tuple:
     
-    words = []
-    for word in word_data:
-        words.append(tuple(word))
-
-    frame = pandas.DataFrame(data=words)
+    frame = pandas.DataFrame(data=(tuple(word) for word in words)
     return tuple(collections.Counter(frame[i]) for i in range(5))
-
-
-@trap
-def remove_words_containing(words:list, chars:str) -> list:
-    """
-    Create shorter list of words that have none of the characters in chars.
-    """
-    for c in chars:
-        words = [ word for word in words if c not in word ]
-    return words
 
 
 @trap
@@ -94,14 +69,27 @@ def filter_good_location(words, list, letter:str, offset:int) -> list:
 
 
 @trap
-def pick_a_word(words:tuple) -> str:
-        
+def remove_words_containing(words:list, chars:str) -> list:
+    """
+    Create shorter list of words that have none of the characters in chars.
+    """
+    for c in chars:
+        words = [ word for word in words if c not in word ]
+    return words
+
+
+@trap
+def pick_a_word(words:tuple):
+    return random.choice(words)        
 
 
 @trap
 def wordle_main(myargs:argparse.Namespace) -> int:
+    global theword
 
     words = tuple(fileutils.read_whitespace_file('fiveletterwords.txt'))    
+    theword = pick_a_word(words)
+    
 
 
 
