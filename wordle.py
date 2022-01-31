@@ -29,14 +29,6 @@ import shutil
 ###
 import pandas
 
-
-###
-# From hpclib
-###
-import fileutils
-import linuxutils
-from   urdecorators import trap
-
 ###
 # Credits
 ###
@@ -55,7 +47,6 @@ __license__ = 'MIT'
 theword = ""
 verbose = False
 
-@trap
 def printv(s:str) -> None:
     """
     print only in verbose mode.
@@ -71,7 +62,6 @@ class SquareColor(enum.Enum):
     YELLOW = enum.auto()
 
 
-@trap
 def filter_yellow_square(words:tuple, letter:str, offset:int) -> tuple:
     """
     For example `filter_bad_location(words, 'e', 3)` will return all the 
@@ -82,7 +72,6 @@ def filter_yellow_square(words:tuple, letter:str, offset:int) -> tuple:
         if word[offset] != letter and letter in word )
 
 
-@trap
 def filter_green_square(words:tuple, letter:str, offset:int) -> tuple:
     """
     Given a letter and an offset, return the words in in the list
@@ -91,7 +80,6 @@ def filter_green_square(words:tuple, letter:str, offset:int) -> tuple:
     return tuple( word for word in words if word[offset] == letter )
 
 
-@trap
 def filter_grey_square(words:tuple, letter:str, offset:int) -> tuple:
     """
     Create shorter list of words that do not contain letter.
@@ -107,7 +95,6 @@ filter_functions = {
     }
 
 
-@trap
 def column_frequencies(words:tuple) -> tuple:
     """
     This function returns a tuple of dicts that correspond to
@@ -118,7 +105,6 @@ def column_frequencies(words:tuple) -> tuple:
     return tuple(collections.Counter(frame[i]) for i in range(len(words[0])))
 
 
-@trap
 def compare_guess_w_target(myguess:str) -> tuple:
     """
     Provide the game's hints.
@@ -134,7 +120,6 @@ def compare_guess_w_target(myguess:str) -> tuple:
     return tuple(hints)
 
 
-@trap
 def eval_guess(word:str, hints:tuple, words:tuple) -> tuple:
     """
     Apply the filters based on the hints.
@@ -147,7 +132,6 @@ def eval_guess(word:str, hints:tuple, words:tuple) -> tuple:
     return words
 
 
-@trap
 def first_guess() -> str:
     """
     Some words are just good places to start. Choose one at random.
@@ -165,7 +149,6 @@ def first_guess() -> str:
             'tiles', 'tines', 'toads', 'toner', 'tones', 'tuner', 'tunes'))
 
 
-@trap
 def guess(words:tuple) -> str:
     """
     Choose the next word from the (already filtered) list of words.
@@ -201,16 +184,29 @@ def guess(words:tuple) -> str:
     return random.choice(good_guesses)
 
 
-@trap
 def pick_a_target(words:tuple):
     return random.choice(words)        
 
 
-@trap
+def read_whitespace_file(filename:str) -> tuple:
+    """
+    This is a generator that returns the whitespace delimited tokens 
+    in a text file, one token at a time.
+    """
+    if not filename: return []
+
+    if not os.path.isfile(filename):
+        sys.stderr.write(f"{filename} cannot be found.")
+        return os.EX_NOINPUT
+
+    f = open(filename)
+    yield from (" ".join(f.read().split('\n'))).split()
+    
+
 def wordle_main(myargs:argparse.Namespace) -> int:
     global theword
 
-    words   = tuple(fileutils.read_whitespace_file(myargs.input))    
+    words   = tuple(read_whitespace_file(myargs.input))    
     theword = myargs.target if myargs.target else pick_a_target(words)
 
     if myargs.guess: 
