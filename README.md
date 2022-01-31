@@ -9,11 +9,12 @@ The default list of five letter words comes from the Stanford University
 Graph Database, however, the program can be used with any word list
 provided the words are all the same length. 
 
-## Program operation
+## Requirements
 
-The program requires the `hpclib` that is also a public repo that you
-can find here: `https://github.com/georgeflanagin/hpclib`. It also
-requires pandas, but almost everyone uses pandas. 
+- Python 3.8 or later.
+- Pandas
+
+## Program operation
 
 The help looks like this:
 
@@ -34,6 +35,10 @@ optional arguments:
                         The target word. Default is to let the program choose one.
   -v, --verbose         Be chatty about what is taking place.
 ```
+
+The input file may be any whitespace delimited list of words. The words can be
+one per line, several per line, or all on one line. You may even have blank
+lines with no words. `wordle` is not fussy.
 
 ## Method of operation
 
