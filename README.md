@@ -51,3 +51,29 @@ words we are talking about are in lower case.
 frequencies in each ordinal position. It tries to choose a guess that 
 adds the most amount of information to the clues that have already been
 given.
+
+## Sample output
+
+```bash
+[master!?][kinghenry(gflanagi):////wordle]: python wordle.py
+Looking for nudes.
+Round #1. The guess is pates. There are 5757 possibilities.
+Round #2. The guess is lines. There are 176 possibilities.
+Round #3. The guess is knees. There are 5 possibilities.
+Round #4. The guess is noses. There are 3 possibilities.
+Round #5. Found it. The word is nudes
+```
+
+And here is one that took a while.
+
+```bash
+[master!?][kinghenry(gflanagi):////wordle]: python wordle.py
+Looking for pined.
+Round #1. The guess is toads. There are 5757 possibilities.
+Round #2. The guess is eider. There are 214 possibilities.
+Round #3. The guess is diked. There are 31 possibilities.
+Round #4. The guess is fixed. There are 22 possibilities.
+Round #5. The guess is piped. There are 17 possibilities.
+Round #6. The guess is piled. There are 2 possibilities.
+Round #7. Found it. The word is pined
+```

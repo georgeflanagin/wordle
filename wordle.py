@@ -223,18 +223,18 @@ def wordle_main(myargs:argparse.Namespace) -> int:
 
     i = 0
     while len(words) > 1:
+        if myguess == theword: break
         i = i+1
         print(f"Round #{i}. The guess is {myguess}. There are {len(words)} possibilities.")
         hints = compare_guess_w_target(myguess)
         words = eval_guess(myguess, hints, words)
         myguess = guess(words)
         
-
     if (words[0] != theword): 
         printv(f"This program has a bug. It found {words[0]} instead of {theword}")
         raise Exception
     
-    sys.stderr.write(f"Found it. The word is {theword}\n")
+    sys.stderr.write(f"Round #{i+1}. Found it. The word is {theword}\n")
     return os.EX_OK
 
 
