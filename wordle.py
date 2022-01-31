@@ -225,8 +225,10 @@ def wordle_main(myargs:argparse.Namespace) -> int:
 
     printv(f"Looking for {theword} with an initial guess of {myguess}")
 
+    i = 0
     while len(words) > 1:
-        printv(f"There are {len(words)} possibilities.")
+        i = i+1
+        print(f"Round #{i}. The guess is {myguess}. There are {len(words)} possibilities.")
         hints = compare_guess_w_target(myguess)
         words = eval_guess(myguess, hints, words)
         myguess = guess(words)
