@@ -40,6 +40,11 @@ The input file may be any whitespace delimited list of words. The words can be
 one per line, several per line, or all on one line. You may even have blank
 lines with no words. `wordle` is not fussy.
 
+OTOH, `wordle` does not check that all your words in the list are the same
+length, and if you choose an initial guess or a target that is of a different
+length, then they will never be found. There is an assumption that all the 
+words we are talking about are in lower case.
+
 ## Method of operation
 
 `wordle` analyzes the word list to make its guesses based on the letter

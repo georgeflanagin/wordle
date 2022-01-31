@@ -200,7 +200,7 @@ def read_whitespace_file(filename:str) -> tuple:
         return os.EX_NOINPUT
 
     f = open(filename)
-    yield from (" ".join(f.read().split('\n'))).split()
+    yield from (" ".join(f.read().lower().split('\n'))).split()
     
 
 def wordle_main(myargs:argparse.Namespace) -> int:
@@ -211,7 +211,7 @@ def wordle_main(myargs:argparse.Namespace) -> int:
 
     if myargs.guess: 
         # The user supplied it.
-        myguess = myargs.guess
+        myguess = myargs.guess.lower()
     elif len(words[0]) == 5: 
         # This is standard Wordle.
         myguess = first_guess()
@@ -219,7 +219,7 @@ def wordle_main(myargs:argparse.Namespace) -> int:
         # This is something else.
         myguess = guess(words)
 
-    printv(f"Looking for {theword} with an initial guess of {myguess}")
+    print(f"Looking for {theword}.")
 
     i = 0
     while len(words) > 1:
@@ -234,7 +234,7 @@ def wordle_main(myargs:argparse.Namespace) -> int:
         printv(f"This program has a bug. It found {words[0]} instead of {theword}")
         raise Exception
     
-    sys.stderr.write(f"The word is {theword}\n")
+    sys.stderr.write(f"Found it. The word is {theword}\n")
     return os.EX_OK
 
 
