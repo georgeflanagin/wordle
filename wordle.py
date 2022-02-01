@@ -237,26 +237,37 @@ def wordle_main(myargs:argparse.Namespace) -> int:
     print(f"Looking for {theword}.")
 
     i = 0
-    while len(words) > 1:
-        if myguess == theword: break
-        i = i+1
-        print(f"Round #{i}. The guess is {myguess}. There are {len(words)} possibilities.")
-        hints = compare_guess_w_target(myguess)
-        newwords = eval_guess(myguess, hints, words)
-        OK = False
-        depth = 5
-        while not OK:
-            myguess = guess(newwords, depth)
-            if not myguess:
-                depth += 1
-                print(f"Backtracking ... {depth=}")
-                continue
-            words = newwords
-            OK = True
-        
+    try:
+        while len(words) > 1:
+            if myguess == theword: break
+            i = i+1
+            print(f"Round #{i}. {myguess=}. There are {len(words)} possibilities.")
+            hints = compare_guess_w_target(myguess)
+            newwords = eval_guess(myguess, hints, words)
+
+            # The inner while loop deals with the situation in which
+            # there are no dictionary words in composed solely of the
+            # N=5 most common letters in each position. In this case,
+            # the letter must be one of the less common letters, os
+            # we back up, and go one deeper on the search. The max
+            # is set to 9.
+            OK = False
+            depth = 5
+            while not OK and depth < 10:
+                myguess = guess(newwords, depth)
+                if not myguess:
+                    depth += 1
+                    print(f"Backtracking ... {depth=}")
+                    continue
+                words = newwords
+                OK = True
+
+    except KeyboardInterrupt as e:
+        print("You pressed control C")
+        sys.exit(os.EX_OK)        
+
     if (myguess != theword): 
-        print(f"This program has a bug. It found {myguess} instead of {theword}")
-        raise Exception
+        raise Exception(f"This program has a bug. It found {myguess} instead of {theword}")
     
     sys.stderr.write(f"Round #{i+1}. Found it. The word is {theword}\n")
     return os.EX_OK
