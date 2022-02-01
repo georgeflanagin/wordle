@@ -29,7 +29,7 @@ import shutil
 ###
 import pandas
 
-from urdecorators import trap
+# from urdecorators import trap
 
 ###
 # Credits
@@ -49,7 +49,7 @@ __license__ = 'MIT'
 theword = ""
 verbose = False
 
-@trap
+#@trap
 def printv(s:str) -> None:
     """
     print only in verbose mode.
@@ -58,7 +58,7 @@ def printv(s:str) -> None:
     verbose and print(s)
 
 
-@trap
+#@trap
 class SquareColor(enum.Enum):
     # We don't care about the underlying values; just the color.
     GREEN  = enum.auto()
@@ -66,7 +66,7 @@ class SquareColor(enum.Enum):
     YELLOW = enum.auto()
 
 
-@trap
+#@trap
 def filter_yellow_square(words:tuple, letter:str, offset:int) -> tuple:
     """
     For example `filter_bad_location(words, 'e', 3)` will return all the 
@@ -77,7 +77,7 @@ def filter_yellow_square(words:tuple, letter:str, offset:int) -> tuple:
         if word[offset] != letter and letter in word )
 
 
-@trap
+#@trap
 def filter_green_square(words:tuple, letter:str, offset:int) -> tuple:
     """
     Given a letter and an offset, return the words in in the list
@@ -86,7 +86,7 @@ def filter_green_square(words:tuple, letter:str, offset:int) -> tuple:
     return tuple( word for word in words if word[offset] == letter )
 
 
-@trap
+#@trap
 def filter_grey_square(words:tuple, letter:str, offset:int) -> tuple:
     """
     Create shorter list of words that do not contain letter.
@@ -102,7 +102,7 @@ filter_functions = {
     }
 
 
-@trap
+#@trap
 def column_frequencies(words:tuple) -> tuple:
     """
     This function returns a tuple of dicts that correspond to
@@ -113,7 +113,7 @@ def column_frequencies(words:tuple) -> tuple:
     return tuple(collections.Counter(frame[i]) for i in range(len(words[0])))
 
 
-@trap
+#@trap
 def compare_guess_w_target(myguess:str) -> tuple:
     """
     Provide the game's hints.
@@ -129,7 +129,7 @@ def compare_guess_w_target(myguess:str) -> tuple:
     return tuple(hints)
 
 
-@trap
+#@trap
 def eval_guess(word:str, hints:tuple, words:tuple) -> tuple:
     """
     Apply the filters based on the hints.
@@ -142,7 +142,7 @@ def eval_guess(word:str, hints:tuple, words:tuple) -> tuple:
     return words
 
 
-@trap
+#@trap
 def first_guess() -> str:
     """
     Some words are just good places to start. Choose one at random.
@@ -160,7 +160,7 @@ def first_guess() -> str:
             'tiles', 'tines', 'toads', 'toner', 'tones', 'tuner', 'tunes'))
 
 
-@trap
+#@trap
 def guess(words:tuple, depth:int=5) -> str:
     """
     Choose the next word from the (already filtered) list of words.
@@ -196,12 +196,12 @@ def guess(words:tuple, depth:int=5) -> str:
     return random.choice(good_guesses)
 
 
-@trap
+#@trap
 def pick_a_target(words:tuple):
     return random.choice(words)        
 
 
-@trap
+#@trap
 def read_whitespace_file(filename:str) -> tuple:
     """
     This is a generator that returns the whitespace delimited tokens 
@@ -217,7 +217,7 @@ def read_whitespace_file(filename:str) -> tuple:
     yield from (" ".join(f.read().lower().split('\n'))).split()
     
 
-@trap
+#@trap
 def wordle_main(myargs:argparse.Namespace) -> int:
     global theword
 
