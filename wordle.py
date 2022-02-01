@@ -161,7 +161,7 @@ def first_guess() -> str:
 
 
 @trap
-def guess(words:tuple) -> str:
+def guess(words:tuple, depth:int=5) -> str:
     """
     Choose the next word from the (already filtered) list of words.
     This function is the core of the method for playing Wordle.
@@ -179,7 +179,7 @@ def guess(words:tuple) -> str:
     ####
     regex = ""
     for i in range(len(frequencies)):
-        common_chars = "".join(_[0] for _ in frequencies[i].most_common(5))
+        common_chars = "".join(_[0] for _ in frequencies[i].most_common(depth))
         regex += f"[{common_chars}]"
 
     printv(f"{regex=}")
@@ -242,11 +242,20 @@ def wordle_main(myargs:argparse.Namespace) -> int:
         i = i+1
         print(f"Round #{i}. The guess is {myguess}. There are {len(words)} possibilities.")
         hints = compare_guess_w_target(myguess)
-        words = eval_guess(myguess, hints, words)
-        myguess = guess(words)
+        newwords = eval_guess(myguess, hints, words)
+        OK = False
+        depth = 5
+        while not OK:
+            myguess = guess(newwords, depth)
+            if not myguess:
+                depth += 1
+                print(f"Backtracking ... {depth=}")
+                continue
+            words = newwords
+            OK = True
         
-    if (words[0] != theword): 
-        printv(f"This program has a bug. It found {words[0]} instead of {theword}")
+    if (myguess != theword): 
+        print(f"This program has a bug. It found {myguess} instead of {theword}")
         raise Exception
     
     sys.stderr.write(f"Round #{i+1}. Found it. The word is {theword}\n")
