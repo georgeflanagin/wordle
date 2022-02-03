@@ -23,6 +23,7 @@ import enum
 import random
 import re
 import shutil
+import time
 
 ###
 # Installed libraries
@@ -222,6 +223,7 @@ def wordle_main(myargs:argparse.Namespace) -> int:
     global theword
 
     words   = tuple(read_whitespace_file(myargs.input))    
+    t = time.time()
     theword = myargs.target if myargs.target else pick_a_target(words)
 
     if myargs.guess: 
@@ -269,7 +271,8 @@ def wordle_main(myargs:argparse.Namespace) -> int:
     if (myguess != theword): 
         raise Exception(f"This program has a bug. It found {myguess} instead of {theword}")
     
-    sys.stderr.write(f"Round #{i+1}. Found it. The word is {theword}\n")
+    print(f"Round #{i+1}. Found it. The word is {theword}\n")
+    print(f"Elapsed time: {time.time() - t}")
     return os.EX_OK
 
 
