@@ -47,8 +47,12 @@ __license__ = 'MIT'
 ###
 # A global.
 ###
+# The one we are looking for.
 theword = ""
+# Does printv do anything?
 verbose = False
+# The size of the original population
+population = 0
 
 #@trap
 def printv(s:str) -> None:
@@ -144,27 +148,20 @@ def eval_guess(word:str, hints:tuple, words:tuple) -> tuple:
 
 
 #@trap
-def first_guess() -> str:
+def first_guess(words:tuple) -> str:
     """
     Some words are just good places to start. Choose one at random.
     These words have no repeated letters, the letters in each 
     position are relatively common, and relatively common in *that* 
     position.
     """
-    return random.choice(('balds', 'baler', 'bales', 'bands',
-            'banes', 'bates', 'beads', 'bends', 'biles', 'binds', 'biter',
-            'bites', 'bonds', 'boner', 'bones', 'bunds', 'caner', 'canes',
-            'cater', 'cites', 'coeds', 'colds', 'cones', 'cotes', 'cuter',
-            'paler', 'pales', 'panes', 'pater', 'pates', 'pends', 'piles',
-            'pines', 'poler', 'poles', 'pones', 'pulse', 'saner', 'sates',
-            'satyr', 'sends', 'soles', 'tales', 'tends', 'tilde', 'tiler',
-            'tiles', 'tines', 'toads', 'toner', 'tones', 'tuner', 'tunes'))
+    return guess(words, no_repeats=True)
 
 
 #@trap
-def guess(words:tuple, depth:int=5) -> str:
+def guess(words:tuple, depth:int=5, no_repeats:bool=False) -> str:
     """
-    Choose the next word from the (already filtered) list of words.
+    Choose the next word from the (already filtered?) list of words.
     This function is the core of the method for playing Wordle.
     """
 
@@ -188,8 +185,19 @@ def guess(words:tuple, depth:int=5) -> str:
     # Makes sense to compile it.
     ###
     regex = re.compile(regex)
-    good_guesses = tuple(word for word in words 
-        if re.fullmatch(regex, word) is not None)
+    good_guesses = [word for word in words 
+        if re.fullmatch(regex, word) is not None]
+
+    if no_repeats:
+        ####
+        # Because we do not know any of the letters on the first guess,
+        # it is a good idea to avoid any words with duplicate letters.
+        ####
+        better_guesses = []
+        for myguess in good_guesses:
+            if len(collections.Counter(myguess).most_common()) == len(myguess): 
+                better_guesses.append(myguess)
+        good_guesses = tuple(better_guesses)
 
     if not len(good_guesses):
         raise Exception("Algorithm failed. No words match.")
@@ -218,48 +226,71 @@ def read_whitespace_file(filename:str) -> tuple:
     yield from (" ".join(f.read().lower().split('\n'))).split()
     
 
+# @trap
+def do_batch(myargs:argparse.Namespace) -> int:
+    """
+    Do an enormous list of comparisons
+    """
+    global theword
+    guesses = tuple(read_whitespace_file(myargs.guess))
+    targets = tuple(read_whitespace_file(myargs.target))
+    for this_target in targets:
+        theword = this_target
+        for this_guess in guesses:
+            n = solve_wordle(this_guess, targets, silent=True)
+            print(f"{theword},{this_guess},{n}")
+
+    return os.EX_OK
+
+
 #@trap
 def wordle_main(myargs:argparse.Namespace) -> int:
     global theword
+    global population
 
-    words   = tuple(read_whitespace_file(myargs.input))    
-    t = time.time()
-    theword = myargs.target if myargs.target else pick_a_target(words)
+    if myargs.batch: return do_batch(myargs)
 
-    if myargs.guess: 
-        # The user supplied it.
-        myguess = myargs.guess.lower()
-    elif len(words[0]) == 5: 
-        # This is standard Wordle.
-        myguess = first_guess()
-    else:  
-        # This is something else.
-        myguess = guess(words)
+    words       = tuple(read_whitespace_file(myargs.input))    
+    t           = time.time()
+    population  = len(words)
+
+    theword     = myargs.target if myargs.target else pick_a_target(words)
+    myguess = myargs.guess.lower() if myargs.guess else first_guess(words)
 
     print(f"Looking for {theword}.")
+    return solve_wordle(myguess, words)
+
+
+def solve_wordle(myguess:str, words:tuple, silent:bool=False) -> int:
+    """
+    Find the word by progressive approximations.
+    """
+    if silent: verbose=False
 
     i = 0
     try:
         while len(words) > 1:
             if myguess == theword: break
             i = i+1
-            print(f"Round #{i}. {myguess=}. There are {len(words)} possibilities.")
+            not silent and print(f"Round #{i}. {myguess=}. There are {len(words)} possibilities.")
             hints = compare_guess_w_target(myguess)
             newwords = eval_guess(myguess, hints, words)
 
+            ####
             # The inner while loop deals with the situation in which
-            # there are no dictionary words in composed solely of the
+            # there are no dictionary words composed solely of the
             # N=5 most common letters in each position. In this case,
             # the letter must be one of the less common letters, os
             # we back up, and go one deeper on the search. The max
             # is set to 9.
+            ####
             OK = False
             depth = 5
             while not OK and depth < 10:
-                myguess = guess(newwords, depth)
+                myguess = guess(newwords, depth) 
                 if not myguess:
                     depth += 1
-                    print(f"Backtracking ... {depth=}")
+                    not silent and print(f"Backtracking ... {depth=}")
                     continue
                 words = newwords
                 OK = True
@@ -271,9 +302,9 @@ def wordle_main(myargs:argparse.Namespace) -> int:
     if (myguess != theword): 
         raise Exception(f"This program has a bug. It found {myguess} instead of {theword}")
     
-    print(f"Round #{i+1}. Found it. The word is {theword}\n")
-    print(f"Elapsed time: {time.time() - t}")
-    return os.EX_OK
+    not silent and print(f"Round #{i+1}. Found it. The word is {theword}\n")
+    not silent and print(f"Elapsed time: {time.time() - t}")
+    return i
 
 
 if __name__ == '__main__':
@@ -281,12 +312,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog="wordle", 
         description="What wordle does, wordle does best.")
 
+    parser.add_argument('-b', '--batch', action='store_true', 
+        help="treat guess and target as files of words, and do a cross-product of them.")
     parser.add_argument('-g', '--guess', type=str, default="",
         help="An initial guess. Default is to let the program choose one.")
     parser.add_argument('-i', '--input', type=str, default="fiveletterwords.txt",
         help="Input file name with the plenum word list. Default is fiveletterwords.txt")
     parser.add_argument('-o', '--output', type=str, default="",
         help="Output file name. If not supplied, stdout")
+    parser.add_argument('-r', '--random-start', action="store_true",
+        help="Make a random guess to start the process.")
     parser.add_argument('-t', '--target', type=str, default="",
         help="The target word. Default is to let the program choose one.")
     parser.add_argument('-v', '--verbose', action='store_true',
@@ -294,6 +329,7 @@ if __name__ == '__main__':
 
     myargs = parser.parse_args()
     verbose = myargs.verbose 
+    if myargs.random_start: myargs.guess = ""
 
     outfile = open(myargs.output, 'w') if myargs.output else sys.stdout
     with contextlib.redirect_stdout(outfile):
