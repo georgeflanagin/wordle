@@ -161,3 +161,10 @@ blind guess.
 The answer it got after guessing `eider` was `|grey |green|grey |green|grey |`,
 and all subsequent guesses were in the format `?i?e?`
 
+In this case, the algorithm had one of its worst-case performances, and it is
+useful to understand why it behaved poorly. The reason is that there are a lot
+of words in English that are of the form `?i?ed`, which is where it got to on the
+next step. The other reason is the bug revealed which this version of the 
+program guessed `piped` when it should have known the word only had one `p`. 
+
+Well, that's been fixed.
